@@ -6,19 +6,57 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ContentView: View {
+    @StateObject var viewModel = ViewModel()
+    
+    @State var showSelection = false
+    @State private var selectedItem: PhotosPickerItem?
+    
     var body: some View {
         VStack {
-            Image(systemName: "globe")
-                .imageScale(.large)
-                .foregroundStyle(.tint)
-            Text("Hello, world!")
+            if viewModel.selectedImage != nil {
+                Image(uiImage: viewModel.selectedImage!)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 300, height: 300)
+//                    .frame(minWidth: 0.0, maxWidth: .infinity)
+                    .padding(.top, 20)
+            }
+            
+            PhotosPicker(
+                selection: $selectedItem,
+                matching: .images,
+                photoLibrary: .shared()) {
+                    Text("Загрузить фото из галлереи")
+                }
+                .onChange(of: selectedItem) { _, newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self) {
+                            DispatchQueue.main.async {
+                                viewModel.selectedImage = UIImage(data: data)
+                            }
+                        }
+                    }
+                }
+            
+            Button {
+                viewModel.tryImage()
+            } label: {
+                Text("Распознать фото")
+            }
+            
+            // Добавляем TextView для отображения результатов
+            ScrollView {
+                Text(viewModel.recognitionResults)
+                    .padding()
+                    .frame(maxWidth: .infinity, alignment: .leading)
+            }
+            .frame(maxWidth: .infinity, maxHeight: 200)  // Ограничиваем высоту для прокрутки, если результаты длинные
+            
+            
         }
         .padding()
     }
-}
-
-#Preview {
-    ContentView()
 }
