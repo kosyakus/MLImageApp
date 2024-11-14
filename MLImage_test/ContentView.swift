@@ -14,16 +14,24 @@ struct ContentView: View {
     
     @State var showSelection = false
     @State private var selectedItem: PhotosPickerItem?
-    @State private var showCamera = false  // Переменная для отображения камеры
+    @State private var showCamera = false
+    @State private var showARView = false
     
     var body: some View {
         VStack {
-            if viewModel.selectedImage != nil {
+            
+            if showARView {
+                ARViewContainer(viewModel: viewModel)
+                    .frame(height: 300)
+                    .padding()
+            }
+            
+            if viewModel.selectedImage != nil && showARView == false {
                 Image(uiImage: viewModel.selectedImage!)
                     .resizable()
                     .scaledToFit()
                     .frame(width: 300, height: 300)
-                    .padding(.top, 20)
+                    .padding()
             }
             
             PhotosPicker(
@@ -50,9 +58,17 @@ struct ContentView: View {
             
             Button {
                 showCamera = true
+                showARView = false
             } label: {
                 Text("Распознать через камеру")
             }
+            
+            Button {
+                showARView = true
+            } label: {
+                Text("Распознать через ARView")
+            }
+            
             .sheet(isPresented: $showCamera) {
                 CameraView(image: $viewModel.selectedImage, onImageCaptured: {
                     viewModel.tryImage()
@@ -65,7 +81,7 @@ struct ContentView: View {
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, maxHeight: 200)
+            .frame(maxWidth: .infinity, maxHeight: 300)
             
             
         }
