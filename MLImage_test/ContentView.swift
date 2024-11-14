@@ -7,12 +7,14 @@
 
 import SwiftUI
 import PhotosUI
+import UIKit
 
 struct ContentView: View {
     @StateObject var viewModel = ViewModel()
     
     @State var showSelection = false
     @State private var selectedItem: PhotosPickerItem?
+    @State private var showCamera = false  // Переменная для отображения камеры
     
     var body: some View {
         VStack {
@@ -21,7 +23,6 @@ struct ContentView: View {
                     .resizable()
                     .scaledToFit()
                     .frame(width: 300, height: 300)
-//                    .frame(minWidth: 0.0, maxWidth: .infinity)
                     .padding(.top, 20)
             }
             
@@ -47,13 +48,24 @@ struct ContentView: View {
                 Text("Распознать фото")
             }
             
+            Button {
+                showCamera = true
+            } label: {
+                Text("Распознать через камеру")
+            }
+            .sheet(isPresented: $showCamera) {
+                CameraView(image: $viewModel.selectedImage, onImageCaptured: {
+                    viewModel.tryImage()
+                })
+            }
+            
             // Добавляем TextView для отображения результатов
             ScrollView {
                 Text(viewModel.recognitionResults)
                     .padding()
                     .frame(maxWidth: .infinity, alignment: .leading)
             }
-            .frame(maxWidth: .infinity, maxHeight: 200)  // Ограничиваем высоту для прокрутки, если результаты длинные
+            .frame(maxWidth: .infinity, maxHeight: 200)
             
             
         }

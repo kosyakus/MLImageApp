@@ -14,7 +14,7 @@ class ViewModel: ObservableObject {
     @Published var selectedImage: UIImage? = nil
     @Published var recognitionResults: String = ""
     
-//    private let initialModel = try? image_model(configuration: MLModelConfiguration()) // импортировали модель
+    // импортировали модель
     private let initialModel: image_model? = {
         do {
             return try image_model(configuration: MLModelConfiguration())
@@ -27,11 +27,8 @@ class ViewModel: ObservableObject {
     private var request: VNCoreMLRequest? // делаем реквест (запрос)
     
     init() {
-//        guard let initialModel = initialModel else { return }
-//        vnCoreMLModel = try? VNCoreMLModel(for: initialModel.model)
-        if let initialModel = initialModel {
-            vnCoreMLModel = try? VNCoreMLModel(for: initialModel.model)
-        }
+        guard let initialModel = initialModel else { return }
+        vnCoreMLModel = try? VNCoreMLModel(for: initialModel.model)
         request = VNCoreMLRequest(model: vnCoreMLModel!, completionHandler: response)
     }
     
@@ -63,31 +60,8 @@ class ViewModel: ObservableObject {
         }
         
         // Форматируем результаты в строку и обновляем `recognitionResults`
-                recognitionResults = observations.map { observation in
-                    "id: \(observation.identifier) : \(observation.confidence)"
-                }.joined(separator: "\n")
+        recognitionResults = observations.map { observation in
+            "id: \(observation.identifier) : \(observation.confidence)"
+        }.joined(separator: "\n")
     }
-
-//    func tryImage() {
-//        guard let image = selectedImage else { return }
-//
-//        let handler = VNImageRequestHandler(cgImage: image.cgImage!)
-//        try? handler.perform([request!])
-//    }
-
-//    func response(request: VNRequest, error: Error?) {
-//        guard error == nil else {
-//            print("Error")
-//            return
-//        }
-//
-//        guard let observations = request.results as? [VNClassificationObservation] else {
-//            print("Error")
-//            return
-//        }
-//
-//        observations.forEach { ob in
-//            print("id: \(ob.identifier) : \(ob.confidence)")
-//        }
-//    }
 }
